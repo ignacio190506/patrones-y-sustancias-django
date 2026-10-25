@@ -1,0 +1,48 @@
+{% extends 'dashboard/base.html' %}
+
+{% block titulo %}{{ info.titulo }}{% endblock %}
+
+{% block contenido %}
+<span class="badge badge-pregunta mb-2">{{ info.pregunta }}</span>
+<span class="badge text-bg-light border mb-2">Listado de datos</span>
+<h1 class="h3 mb-3">{{ info.titulo }}</h1>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-white fw-semibold">¿Qué información muestra esta tabla?</div>
+    <div class="card-body">{{ info.explicacion }}</div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <!-- Los nombres de las columnas vienen desde la vista -->
+                    {% for columna in columnas %}
+                    <th>{{ columna }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Una fila por cada registro calculado en la vista -->
+                {% for fila in filas %}
+                <tr>
+                    {% for valor in fila %}
+                    <td>{{ valor }}</td>
+                    {% endfor %}
+                </tr>
+                {% empty %}
+                <tr><td colspan="{{ columnas|length }}">No hay datos para mostrar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+    <div class="card-header bg-white fw-semibold">Cómo leer los resultados</div>
+    <div class="card-body">{{ info.lectura }}</div>
+</div>
+
+<a class="btn btn-outline-primary mt-3" href="{% url 'index' %}">Volver al inicio</a>
+{% endblock %}

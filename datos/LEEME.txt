@@ -1,0 +1,7 @@
+Archivos de datos del proyecto (los mismos que usa el notebook Proyecto_Nuevo.ipynb):
+
+  - drug_consumption.data       UCI Drug Consumption (Quantified), 1.885 x 32
+  - enpg_2024_reducida.csv      SENDA ENPG 2024, 18.668 filas, solo las 13 columnas usadas
+
+La base original Base_Publica_ENPG_2024.dta (402 columnas, 54 MB) no se sube a GitHub.
+Si se copia en esta carpeta y se borra el CSV, el proyecto la lee directamente.

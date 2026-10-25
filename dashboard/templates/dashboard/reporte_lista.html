@@ -1,0 +1,37 @@
+{% extends 'dashboard/base.html' %}
+
+{% block titulo %}Reportes{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-1">Reportes del análisis</h1>
+<p class="text-secondary mb-3">Principales resultados del proyecto, ordenados por pregunta de investigación.</p>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Pregunta</th><th>Reporte</th><th>Fuente</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- La vista envía la lista de reportes; aquí solo se muestran -->
+                {% for reporte in reportes %}
+                <tr>
+                    <td><span class="badge badge-pregunta">{{ reporte.pregunta }}</span></td>
+                    <td>
+                        <strong>{{ reporte.titulo }}</strong>
+                        <div class="small text-secondary">{{ reporte.descripcion }}</div>
+                    </td>
+                    <td class="text-nowrap">{{ reporte.fuente }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3">No existen reportes.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a class="btn btn-outline-primary mt-3" href="{% url 'index' %}">Volver al inicio</a>
+{% endblock %}

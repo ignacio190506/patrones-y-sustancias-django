@@ -1,0 +1,13 @@
+{% extends 'dashboard/base.html' %}
+
+{% block titulo %}Faltan datos{% endblock %}
+
+{% block contenido %}
+<div class="alert alert-warning">
+    <h1 class="h4">No se encontró el archivo {{ archivo }}</h1>
+    <p class="mb-0">Copie <code>drug_consumption.data</code> y <code>Base_Publica_ENPG_2024.dta</code>
+    (los mismos que usa el notebook) dentro de la carpeta <code>datos</code>, junto a <code>manage.py</code>,
+    y reinicie el servidor con <code>py manage.py runserver</code>.</p>
+</div>
+<a class="btn btn-outline-primary" href="{% url 'reporte_lista' %}">Ir a los reportes</a>
+{% endblock %}

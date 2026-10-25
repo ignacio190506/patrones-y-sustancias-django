@@ -1,0 +1,10 @@
+# Entorno virtual: cada computador crea el suyo
+.venv/
+__pycache__/
+*.pyc
+
+# Base de datos local: se recrea con migrate y loaddata
+db.sqlite3
+
+# Base original de SENDA (54 MB): el proyecto usa datos/enpg_2024_reducida.csv
+datos/Base_Publica_ENPG_2024.dta

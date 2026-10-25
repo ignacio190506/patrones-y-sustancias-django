@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Dashboard{% endblock %} · Consumo de sustancias</title>
+    <!-- Bootstrap 5.3.8 desde CDN (guía 6) -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <style>
+        /* Pequeños ajustes visuales para el modo dashboard */
+        body { background: #F4F6F9; }
+        .kpi { border: 0; border-left: 4px solid var(--kpi-color, #406AB4); }
+        .kpi .valor { font-size: 1.9rem; font-weight: 700; line-height: 1.1; }
+        .kpi .etiqueta { font-size: .8rem; color: #6B7280; text-transform: uppercase; letter-spacing: .04em; }
+        .card { border: 0; }
+        .badge-pregunta { background: #EEF2FA; color: #406AB4; font-weight: 600; }
+        .tarjeta-grafico img { transition: transform .15s; }
+        .tarjeta-grafico:hover img { transform: scale(1.01); }
+
+        /* Menú lateral vertical */
+        .menu-lateral .nav-link { color: #374151; border-radius: .375rem; }
+        .menu-lateral .nav-link:hover { background: #EEF2FA; color: #406AB4; }
+        .menu-lateral .submenu { margin-left: .75rem; border-left: 2px solid #E5E7EB; }
+        .menu-lateral .submenu .nav-link { font-size: .9rem; padding: .3rem .75rem; }
+        .menu-lateral button[aria-expanded="true"] .flecha { display: inline-block; transform: rotate(180deg); }
+        @media (min-width: 992px) {
+            /* En pantallas grandes el menú queda fijo a la izquierda */
+            .menu-lateral { position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Columna izquierda: menú vertical -->
+            <aside class="col-12 col-lg-3 col-xl-2 p-0">
+                {% include 'dashboard/menu.html' %}
+            </aside>
+
+            <!-- Columna derecha: contenido de cada página -->
+            <div class="col-12 col-lg-9 col-xl-10">
+                <main class="py-4 px-lg-3">
+                    {% block contenido %}{% endblock %}
+                </main>
+
+                <footer class="pb-4 px-lg-3 small text-secondary">
+                    Proyecto semestral · Certamen 2 · Ignacio Cruz, Andrés Pérez, Antonia Espinoza, Juan Diego Smith ·
+                    Fuentes: SENDA ENPG 2024 y UCI Drug Consumption (Quantified)
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+</body>
+</html>

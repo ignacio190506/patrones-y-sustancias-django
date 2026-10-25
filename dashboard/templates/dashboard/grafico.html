@@ -1,0 +1,46 @@
+{% extends 'dashboard/base.html' %}
+
+{% block titulo %}{{ info.titulo }}{% endblock %}
+
+{% block contenido %}
+<span class="badge badge-pregunta mb-2">{{ info.pregunta }}</span>
+<span class="badge text-bg-light border mb-2">{{ info.tipo }}</span>
+<h1 class="h3 mb-1">{{ info.titulo }}</h1>
+<p class="text-secondary">{{ info.texto }}</p>
+
+<div class="card shadow-sm">
+    <div class="card-body text-center">
+        <img src="data:image/png;base64,{{ grafico }}" class="img-fluid rounded" alt="{{ info.titulo }}">
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white fw-semibold">¿Qué muestra el gráfico?</div>
+            <div class="card-body">{{ info.explicacion }}</div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Interpretación</div>
+            <div class="card-body">{{ info.interpretacion }}</div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold">Reportes de {{ info.pregunta }}</div>
+            <ul class="list-group list-group-flush">
+                {% for reporte in reportes %}
+                <li class="list-group-item">
+                    <strong>{{ reporte.titulo }}</strong>
+                    <div class="small text-secondary">{{ reporte.descripcion }}</div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-secondary">No hay reportes para esta pregunta.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<a class="btn btn-outline-primary mt-3" href="{% url 'index' %}">Volver al inicio</a>
+{% endblock %}

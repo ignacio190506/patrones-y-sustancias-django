@@ -1,0 +1,68 @@
+<!-- Menú lateral vertical. Los desplegables usan "collapse" de Bootstrap -->
+<nav class="menu-lateral bg-white border-end shadow-sm" aria-label="Navegación principal">
+
+    <!-- Cabecera: marca y botón para abrir/cerrar el menú en pantallas pequeñas -->
+    <div class="d-flex justify-content-between align-items-center px-3 py-3 border-bottom">
+        <a class="fw-bold fs-5 text-decoration-none" href="{% url 'index' %}">
+            <span style="color:#406AB4">Patrones</span><span style="color:#22c754"> y </span><span style="color:#E25E6B">Sustancias</span>
+        </a>
+        <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button"
+                data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+                aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir o cerrar menú">
+            ☰
+        </button>
+    </div>
+
+    <!-- En pantallas grandes el menú siempre está visible (d-lg-block) -->
+    <div class="collapse d-lg-block" id="menuPrincipal">
+        <ul class="nav flex-column p-2">
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'index' %}">Inicio</a>
+            </li>
+
+            <!-- Desplegable 1: Listados de datos -->
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start d-flex justify-content-between align-items-center"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#menuListados"
+                        aria-expanded="false" aria-controls="menuListados">
+                    Listados de datos <span class="flecha">▾</span>
+                </button>
+                <div class="collapse" id="menuListados">
+                    <ul class="nav flex-column submenu">
+                        <li><a class="nav-link" href="{% url 'listado1' %}">Recencia por sustancia y fuente</a></li>
+                        <li><a class="nav-link" href="{% url 'listado2' %}">Consumo por edad y sexo (Chile)</a></li>
+                        <li><a class="nav-link" href="{% url 'listado3' %}">Perfil psicológico por policonsumo</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Desplegable 2: Gráficos -->
+            <li class="nav-item">
+                <button class="nav-link w-100 text-start d-flex justify-content-between align-items-center"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#menuGraficos"
+                        aria-expanded="false" aria-controls="menuGraficos">
+                    Gráficos <span class="flecha">▾</span>
+                </button>
+                <div class="collapse" id="menuGraficos">
+                    <ul class="nav flex-column submenu">
+                        <li><a class="nav-link" href="{% url 'grafico1' %}">Barras · Recencia por sustancia</a></li>
+                        <li><a class="nav-link" href="{% url 'grafico2' %}">Líneas · Consumo por edad</a></li>
+                        <li><a class="nav-link" href="{% url 'grafico3' %}">Dispersión · Impulsividad</a></li>
+                        <li class="small text-secondary px-3 pt-2">Análisis complementarios</li>
+                        <li><a class="nav-link" href="{% url 'grafico4' %}">Mapa de calor · Personalidad</a></li>
+                        <li><a class="nav-link" href="{% url 'grafico5' %}">Burbujas · Policonsumo</a></li>
+                        <li><a class="nav-link" href="{% url 'grafico6' %}">Radar · Perfil psicológico</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'reporte_lista' %}">Reportes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/">Admin</a>
+            </li>
+        </ul>
+    </div>
+</nav>
