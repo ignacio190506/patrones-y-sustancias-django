@@ -1,0 +1,17 @@
+{% load static %}
+<!-- Formulario de filtros compartido por el gráfico dinámico y el reporte 4.
+     Usa GET: la selección viaja en la URL y se puede reutilizar en los enlaces y descargas. -->
+<form id="formulario-filtros" method="get" class="card shadow-sm mb-3">
+    <div class="card-body row g-3 align-items-end">
+        {% for campo in form %}
+        <div class="col-6 col-lg">
+            <label class="form-label small fw-semibold" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            {{ campo }}
+        </div>
+        {% endfor %}
+        <div class="col-12 col-lg-auto">
+            <button type="submit" class="btn btn-primary w-100">Actualizar</button>
+        </div>
+    </div>
+</form>
+<script src="{% static 'dashboard/js/filtros.js' %}" defer></script>

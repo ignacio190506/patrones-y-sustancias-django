@@ -2,3 +2,7 @@ Django==5.1.14
 pandas
 numpy
 matplotlib
+reportlab
+openpyxl
+whitenoise
+gunicorn

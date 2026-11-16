@@ -8,3 +8,6 @@ db.sqlite3
 
 # Base original de SENDA (54 MB): el proyecto usa datos/enpg_2024_reducida.csv
 datos/Base_Publica_ENPG_2024.dta
+
+# Archivos estáticos reunidos por collectstatic
+staticfiles/

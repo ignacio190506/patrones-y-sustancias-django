@@ -1,7 +1,9 @@
-Archivos de datos del proyecto (los mismos que usa el notebook Proyecto_Nuevo.ipynb):
+Archivos originales de los datasets. No se leen al usar el sitio: el comando
 
-  - drug_consumption.data       UCI Drug Consumption (Quantified), 1.885 x 32
+    python manage.py cargar_datos
+
+los carga una vez en la base de datos SQLite y desde ahí los consulta el proyecto.
+
+  - drug_consumption.data       UCI Drug Consumption (Quantified), 1.885 filas x 32 columnas
   - enpg_2024_reducida.csv      SENDA ENPG 2024, 18.668 filas, solo las 13 columnas usadas
-
-La base original Base_Publica_ENPG_2024.dta (402 columnas, 54 MB) no se sube a GitHub.
-Si se copia en esta carpeta y se borra el CSV, el proyecto la lee directamente.
+                                (la base original Base_Publica_ENPG_2024.dta pesa 54 MB)

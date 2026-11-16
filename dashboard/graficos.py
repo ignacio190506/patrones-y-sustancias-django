@@ -1,9 +1,6 @@
 """
-Gráficos del dashboard. Cada función dibuja una figura con Matplotlib y devuelve
-el PNG codificado en base64, igual que grafico1..grafico5 de las guías 4, 5 y 6.
-
-La única diferencia con las guías es que el bloque BytesIO/base64, que antes se
-repetía en cada vista, aquí está escrito una sola vez en figura_a_base64().
+Gráficos del dashboard. Cada función dibuja una figura con Matplotlib y la devuelve
+como PNG codificado en base64, lista para insertarla en una etiqueta <img>.
 """
 import base64
 from functools import lru_cache
@@ -49,11 +46,11 @@ def _fmt(valor):
 
 
 # ---------------------------------------------------------------------------
-# Gráfico de BARRAS · P1 · Barras horizontales agrupadas (guías 4 y 6)
+# Gráfico 1 · Barras · Recencia de consumo por sustancia y fuente
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
 def grafico_barras():
-    _, df_chile_18, df_mundo = an.obtener_datos()
+    _, df_chile_18, df_uci = an.obtener_datos()
     sustancias = list(an.SUSTANCIAS_COMPARABLES.keys())
     posiciones = np.arange(len(sustancias))
     alto = 0.38
@@ -62,7 +59,7 @@ def grafico_barras():
     for eje, (nombre_ventana, ventana) in zip(ejes, an.VENTANAS.items()):
         chile = [an.porcentaje_recencia(df_chile_18[c], ventana)[0]
                  for c in an.SUSTANCIAS_COMPARABLES.values()]
-        uci = [an.porcentaje_recencia(df_mundo[c], ventana)[0]
+        uci = [an.porcentaje_recencia(df_uci[c], ventana)[0]
                for c in an.SUSTANCIAS_COMPARABLES.values()]
         b1 = eje.barh(posiciones - alto / 2, chile, alto, color=an.COLOR_CHILE, label="Chile ENPG 2024")
         b2 = eje.barh(posiciones + alto / 2, uci, alto, color=an.COLOR_UCI, label="Muestra internacional UCI")
@@ -79,19 +76,19 @@ def grafico_barras():
 
 
 # ---------------------------------------------------------------------------
-# Gráfico de LÍNEAS · P2 · Consumo en los últimos 30 días por grupo de edad
+# Gráfico 2 · Líneas · Consumo en los últimos 30 días por grupo de edad
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
 def grafico_lineas():
-    _, df_chile_18, df_mundo = an.obtener_datos()
+    _, df_chile_18, df_uci = an.obtener_datos()
     ventana = an.VENTANAS["Últimos 30 días"]
     colores = {"Alcohol": "#73C96A", "Tabaco": "#969798", "Marihuana": an.COLOR_CHILE, "Cocaína": an.COLOR_UCI}
 
     figura, ejes = plt.subplots(1, 2, figsize=(13, 4.8), sharey=True)
     for eje, (nombre, df) in zip(ejes, [("Chile ENPG 2024", df_chile_18),
-                                        ("Muestra internacional UCI", df_mundo)]):
+                                        ("Muestra internacional UCI", df_uci)]):
         for sustancia, columna in an.SUSTANCIAS_COMPARABLES.items():
-            valores = [an.porcentaje_recencia(df.loc[df["Grupo_Edad"] == g, columna], ventana)[0]
+            valores = [an.porcentaje_recencia(df.loc[df["grupo_edad"] == g, columna], ventana)[0]
                        for g in an.ETIQUETAS_EDAD]
             eje.plot(an.ETIQUETAS_EDAD, valores, marker="o", linewidth=2,
                      color=colores[sustancia], label=sustancia)
@@ -104,19 +101,76 @@ def grafico_lineas():
     figura.suptitle("Consumo en los últimos 30 días según grupo de edad", fontweight="bold")
     return figura_a_base64(figura)
 
-
 # ---------------------------------------------------------------------------
-# Gráfico 3 · P3 · Mapa de calor rasgo × sustancia
+# Gráfico 3 · Dispersión · Impulsividad y búsqueda de sensaciones
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
-def grafico_p3():
-    _, _, df_mundo = an.obtener_datos()
+def grafico_dispersion():
+    _, _, df_uci = an.obtener_datos()
+    colores = {"Nunca": "#969798", "Hace más de 1 año": "#73C96A",
+               "Último año": an.COLOR_CHILE, "Últimos 30 días": an.COLOR_UCI}
+    # Pequeño desplazamiento aleatorio (jitter): ambas escalas tienen pocos
+    # valores posibles y sin él muchos puntos quedarían uno encima del otro
+    rng = np.random.default_rng(42)
+
+    figura, eje = plt.subplots(figsize=(10, 6))
+    for nivel in an.ORDEN_RECENCIA:
+        sub = df_uci[df_uci["marihuana_recencia"] == nivel]
+        x = sub["impulsividad_percentil"] + rng.uniform(-3.5, 3.5, len(sub))
+        y = sub["busqueda_sensaciones_percentil"] + rng.uniform(-3, 3, len(sub))
+        eje.scatter(x, y, s=16, alpha=0.6,
+                    color=colores[nivel], edgecolors="none", label=f"{nivel} (n={len(sub)})")
+    eje.set_xlim(-3, 103)
+    eje.set_ylim(-3, 103)
+    eje.set_xlabel("Percentil de impulsividad")
+    eje.set_ylabel("Percentil de búsqueda de sensaciones")
+    eje.set_title("Impulsividad y búsqueda de sensaciones por participante (UCI)")
+    eje.grid(True, alpha=0.3)
+    eje.legend(title="Último consumo de marihuana", frameon=False, loc="upper left",
+               bbox_to_anchor=(1.01, 1), markerscale=1.6)
+    return figura_a_base64(figura)
+
+
+# ---------------------------------------------------------------------------
+# Gráfico 4 · Dinámico · Consumo por grupo de edad según los filtros elegidos
+# ---------------------------------------------------------------------------
+def grafico_dinamico(sustancia, ventana, sexo, edad_desde, edad_hasta):
+    """Usa la misma tabla que el reporte 4. Devuelve None si la selección no tiene datos."""
+    _, filas = an.tabla_consumo_filtrado(sustancia, ventana, sexo, edad_desde, edad_hasta)
+    if not filas:
+        return None
+    grupos = [grupo for grupo in an.ETIQUETAS_EDAD if any(fila[0] == grupo for fila in filas)]
+    ancho = 0.38
+
+    figura, eje = plt.subplots(figsize=(10, 5))
+    for fuente, color, desplazamiento in [(an.FUENTE_CHILE, an.COLOR_CHILE, -ancho / 2),
+                                          (an.FUENTE_UCI, an.COLOR_UCI, ancho / 2)]:
+        porcentajes = {fila[0]: fila[4] for fila in filas if fila[1] == fuente}
+        posiciones = [grupos.index(grupo) + desplazamiento for grupo in porcentajes]
+        barras = eje.bar(posiciones, list(porcentajes.values()), ancho, color=color, label=fuente)
+        eje.bar_label(barras, labels=[_fmt(valor) + "%" for valor in porcentajes.values()],
+                      padding=3, fontsize=8)
+    eje.set_xticks(range(len(grupos)), grupos)
+    eje.set_ylim(0, 110)
+    eje.set_xlabel("Grupo de edad")
+    eje.set_ylabel("% de personas que consumió")
+    eje.set_title(f"Consumo de {sustancia.lower()} · {ventana} · Sexo: {sexo}")
+    eje.legend(frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=2)
+    return figura_a_base64(figura)
+
+
+# ---------------------------------------------------------------------------
+# Gráfico 5 · Mapa de calor · Rasgo de personalidad por sustancia
+# ---------------------------------------------------------------------------
+@lru_cache(maxsize=1)
+def grafico_mapa_calor():
+    _, _, df_uci = an.obtener_datos()
     sustancias = list(an.SUSTANCIAS_UCI.items())
     matriz = np.zeros((len(sustancias), len(an.RASGOS)))
     for i, (_, columna) in enumerate(sustancias):
-        consume = df_mundo[columna].isin(an.CLASES_RECIENTES)
+        consume = df_uci[columna].isin(an.CLASES_RECIENTES)
         for j, rasgo in enumerate(an.RASGOS):
-            percentil = df_mundo[rasgo + "_Percentil"]
+            percentil = df_uci[rasgo + "_percentil"]
             matriz[i, j] = percentil[consume].mean() - percentil[~consume].mean() if consume.any() else 0
 
     figura, eje = plt.subplots(figsize=(10, 8.5))
@@ -137,49 +191,19 @@ def grafico_p3():
 
 
 # ---------------------------------------------------------------------------
-# Gráfico de DISPERSIÓN · P4 · Impulsividad vs búsqueda de sensaciones
+# Gráfico 6 · Burbujas · Policonsumo por edad y sexo
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
-def grafico_dispersion():
-    _, _, df_mundo = an.obtener_datos()
-    colores = {"Nunca": "#969798", "Hace más de 1 año": "#73C96A",
-               "Último año": an.COLOR_CHILE, "Últimos 30 días": an.COLOR_UCI}
-    # Pequeño desplazamiento aleatorio (jitter): ambas escalas tienen pocos
-    # valores posibles y sin él muchos puntos quedarían uno encima del otro
-    rng = np.random.default_rng(42)
-
-    figura, eje = plt.subplots(figsize=(10, 6))
-    for nivel in an.ORDEN_RECENCIA:
-        sub = df_mundo[df_mundo["Marihuana_Recencia"] == nivel]
-        x = sub["Impulsividad_Percentil"] + rng.uniform(-3.5, 3.5, len(sub))
-        y = sub["Busqueda_Sensaciones_Percentil"] + rng.uniform(-3, 3, len(sub))
-        eje.scatter(x, y, s=16, alpha=0.6,
-                    color=colores[nivel], edgecolors="none", label=f"{nivel} (n={len(sub)})")
-    eje.set_xlim(-3, 103)
-    eje.set_ylim(-3, 103)
-    eje.set_xlabel("Percentil de impulsividad")
-    eje.set_ylabel("Percentil de búsqueda de sensaciones")
-    eje.set_title("Impulsividad y búsqueda de sensaciones por participante (UCI)")
-    eje.grid(True, alpha=0.3)
-    eje.legend(title="Último consumo de marihuana", frameon=False, loc="upper left",
-               bbox_to_anchor=(1.01, 1), markerscale=1.6)
-    return figura_a_base64(figura)
-
-
-# ---------------------------------------------------------------------------
-# Gráfico 5 · P5a · Burbujas edad × sexo (dispersión de la guía 5)
-# ---------------------------------------------------------------------------
-@lru_cache(maxsize=1)
-def grafico_p5a():
-    _, df_chile_18, df_mundo = an.obtener_datos()
+def grafico_burbujas():
+    _, df_chile_18, df_uci = an.obtener_datos()
     figura, ejes = plt.subplots(1, 2, figsize=(13, 4.4), sharey=True)
     for eje, (nombre, df) in zip(ejes, [("Chile ENPG 2024", df_chile_18),
-                                        ("Muestra internacional UCI", df_mundo)]):
+                                        ("Muestra internacional UCI", df_uci)]):
         xs, ys, valores = [], [], []
         for i, grupo in enumerate(an.ETIQUETAS_EDAD):
             for j, sexo in enumerate(["Mujer", "Hombre"]):
-                sub = df[(df["Grupo_Edad"] == grupo) & (df["Sexo"] == sexo)]
-                pct = (sub["Policonsumo_30d"] >= 2).mean() * 100 if len(sub) else 0
+                sub = df[(df["grupo_edad"] == grupo) & (df["sexo"] == sexo)]
+                pct = (sub["policonsumo_30d"] >= 2).mean() * 100 if len(sub) else 0
                 xs.append(i); ys.append(j); valores.append(pct)
         puntos = eje.scatter(xs, ys, s=[60 + v * 22 for v in valores], c=valores,
                              cmap="plasma", vmin=0, vmax=100, edgecolors="white", linewidths=1)
@@ -199,16 +223,16 @@ def grafico_p5a():
 
 
 # ---------------------------------------------------------------------------
-# Gráfico 6 · P5b · Radar de perfil psicológico por nivel de policonsumo
+# Gráfico 7 · Radar · Perfil psicológico por nivel de policonsumo
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
-def grafico_p5b():
-    _, _, df_mundo = an.obtener_datos()
+def grafico_radar():
+    _, _, df_uci = an.obtener_datos()
     grupos = {
-        "0 sustancias": (df_mundo["Policonsumo_30d"] == 0, "#969798"),
-        "1 sustancia": (df_mundo["Policonsumo_30d"] == 1, "#73C96A"),
-        "2 sustancias": (df_mundo["Policonsumo_30d"] == 2, an.COLOR_CHILE),
-        "3 o 4 sustancias": (df_mundo["Policonsumo_30d"] >= 3, an.COLOR_UCI),
+        "0 sustancias": (df_uci["policonsumo_30d"] == 0, "#969798"),
+        "1 sustancia": (df_uci["policonsumo_30d"] == 1, "#73C96A"),
+        "2 sustancias": (df_uci["policonsumo_30d"] == 2, an.COLOR_CHILE),
+        "3 o 4 sustancias": (df_uci["policonsumo_30d"] >= 3, an.COLOR_UCI),
     }
     etiquetas = list(an.RASGOS.values())
     angulos = np.linspace(0, 2 * np.pi, len(etiquetas), endpoint=False).tolist()
@@ -216,7 +240,7 @@ def grafico_p5b():
 
     figura, eje = plt.subplots(figsize=(8, 7), subplot_kw={"polar": True})
     for nombre, (filtro, color) in grupos.items():
-        valores = [df_mundo.loc[filtro, r + "_Percentil"].mean() for r in an.RASGOS]
+        valores = [df_uci.loc[filtro, r + "_percentil"].mean() for r in an.RASGOS]
         valores += valores[:1]
         eje.plot(angulos, valores, color=color, linewidth=2, label=f"{nombre} (n={int(filtro.sum())})")
         eje.fill(angulos, valores, color=color, alpha=0.08)
@@ -229,12 +253,12 @@ def grafico_p5b():
 
 
 # ---------------------------------------------------------------------------
-# Gráfico circular del dashboard (guía 5) · Distribución del policonsumo
+# Gráfico circular de la página de inicio · Distribución del policonsumo
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
 def grafico_circular_policonsumo():
     _, df_chile_18, _ = an.obtener_datos()
-    conteo = df_chile_18["Policonsumo_30d"].clip(upper=3).value_counts().sort_index()
+    conteo = df_chile_18["policonsumo_30d"].clip(upper=3).value_counts().sort_index()
     etiquetas = {0: "Ninguna", 1: "1 sustancia", 2: "2 sustancias", 3: "3 o 4"}
     figura, eje = plt.subplots(figsize=(5.5, 4.2))
     eje.pie(conteo.values, autopct=lambda p: f"{p:.1f}%" if p >= 3 else "",

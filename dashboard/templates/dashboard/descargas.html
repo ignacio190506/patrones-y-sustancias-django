@@ -1,0 +1,21 @@
+{% load static %}
+<!-- Botones de descarga. request.GET.urlencode repite los filtros vigentes en la URL del archivo -->
+<div class="d-flex flex-wrap gap-2 mt-3">
+    <button type="button" class="btn btn-primary boton-descarga"
+            data-url="{% url 'reporte_pdf' numero %}?{{ request.GET.urlencode }}"
+            data-nombre="reporte{{ numero }}.pdf"
+            data-tipo="application/pdf">Descarga en PDF</button>
+    <button type="button" class="btn btn-success boton-descarga"
+            data-url="{% url 'reporte_excel' numero %}?{{ request.GET.urlencode }}"
+            data-nombre="reporte{{ numero }}.xlsx"
+            data-tipo="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Descarga en Excel</button>
+</div>
+<p id="estado-descarga" role="status" aria-live="polite" class="small text-secondary mt-2"></p>
+
+<dialog id="aviso-descarga" aria-labelledby="titulo-aviso">
+    <h2 id="titulo-aviso" class="h5">Descarga del reporte</h2>
+    <p id="mensaje-descarga"></p>
+    <form method="dialog">
+        <button type="submit" class="btn btn-primary" autofocus>Aceptar</button>
+    </form>
+</dialog>

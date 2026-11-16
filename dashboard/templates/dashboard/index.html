@@ -3,13 +3,8 @@
 {% block titulo %}Dashboard{% endblock %}
 
 {% block contenido %}
-<div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-2">
-    <div>
-        <h1 class="h3 mb-1">Patrones de consumo de sustancias</h1>
-        <p class="text-secondary mb-0">Chile (ENPG 2024) y muestra internacional (UCI) · personas de 18 años o más</p>
-    </div>
-    <a class="btn btn-outline-primary" href="{% url 'reporte_lista' %}">Ver reportes</a>
-</div>
+<h1 class="h3 mb-1">Patrones de consumo de sustancias</h1>
+<p class="text-secondary mb-4">Chile (ENPG 2024) y muestra internacional (UCI) · personas de 18 años o más</p>
 
 <!-- Fila de indicadores (KPI) -->
 <div class="row g-3 mb-4">
@@ -17,7 +12,7 @@
         <div class="card kpi shadow-sm h-100"><div class="card-body">
             <div class="etiqueta">Encuestados Chile</div>
             <div class="valor">{{ kpis.encuestados_chile }}</div>
-            <div class="small text-secondary">Representan {{ kpis.poblacion }} millones de personas</div>
+            <div class="small text-secondary">Representan {{ kpis.poblacion_millones }} millones de personas</div>
         </div></div>
     </div>
     <div class="col-6 col-lg-3">
@@ -43,29 +38,31 @@
     </div>
 </div>
 
-<!-- Grilla de gráficos: un for recorre la lista de tarjetas enviada por la vista -->
+<!-- Grilla de gráficos: cada tarjeta enlaza a su gráfico y a su reporte -->
 <div class="row g-3 mb-4">
     {% for tarjeta in tarjetas %}
     <div class="col-12 col-xl-6">
-        <a class="card shadow-sm h-100 text-decoration-none text-reset tarjeta-grafico" href="{% url tarjeta.ruta %}">
+        <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">{{ tarjeta.titulo }}</span>
-                <span>
-                    <span class="badge text-bg-light border">{{ tarjeta.tipo }}</span>
-                    <span class="badge badge-pregunta">{{ tarjeta.pregunta }}</span>
-                </span>
+                <span class="fw-semibold">{{ tarjeta.info.titulo }}</span>
+                <span class="badge text-bg-light border">{{ tarjeta.info.tipo }}</span>
             </div>
-            <div class="card-body text-center">
+            <a class="card-body text-center" href="{% url tarjeta.ruta %}">
                 <img src="data:image/png;base64,{{ tarjeta.grafico }}" class="img-fluid rounded"
-                     alt="{{ tarjeta.titulo }}">
+                     alt="{{ tarjeta.info.titulo }}">
+            </a>
+            <div class="card-footer bg-white d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary" href="{% url tarjeta.ruta %}">Ver gráfico</a>
+                <a class="btn btn-sm btn-primary" href="{% url 'reporte' tarjeta.info.reporte %}">
+                    Ver reporte {{ tarjeta.info.reporte }}
+                </a>
             </div>
-        </a>
+        </div>
     </div>
     {% endfor %}
 </div>
 
 <div class="row g-3">
-    <!-- Gráfico circular (guía 5) -->
     <div class="col-12 col-lg-4">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white fw-semibold">Sustancias consumidas en 30 días · Chile</div>
@@ -75,37 +72,29 @@
         </div>
     </div>
 
-    <!-- Reportes destacados: lista fija definida en reportes.py -->
     <div class="col-12 col-lg-8">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Reportes destacados</span>
-                <a class="small" href="{% url 'reporte_lista' %}">Ver todos</a>
-            </div>
-            <ul class="list-group list-group-flush">
-                {% for reporte in destacados %}
-                <li class="list-group-item">
-                    <span class="badge badge-pregunta me-2">{{ reporte.pregunta }}</span>
+            <div class="card-header bg-white fw-semibold">Reportes</div>
+            <div class="list-group list-group-flush">
+                {% for numero, reporte in reportes.items %}
+                <a class="list-group-item list-group-item-action" href="{% url 'reporte' numero %}">
+                    <span class="badge badge-pregunta me-2">Reporte {{ numero }}</span>
                     <strong>{{ reporte.titulo }}</strong>
-                    <div class="small text-secondary mt-1">{{ reporte.descripcion|truncatewords:32 }}</div>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-secondary">
-                    No hay reportes destacados.
-                </li>
+                    <div class="small text-secondary mt-1">{{ reporte.resumen }}</div>
+                </a>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Tabla de datasets: lista de objetos Python (guía 2) -->
+<!-- Datasets cargados en SQLite -->
 <div class="card shadow-sm mt-4">
-    <div class="card-header bg-white fw-semibold">Fuentes de datos</div>
+    <div class="card-header bg-white fw-semibold">Fuentes de datos en la base de datos</div>
     <div class="table-responsive">
         <table class="table table-striped align-middle mb-0">
             <thead>
-                <tr><th>Dataset</th><th>Fuente</th><th>Periodo</th><th>Filas</th><th>Columnas</th><th>Unidad de observación</th></tr>
+                <tr><th>Dataset</th><th>Fuente</th><th>Periodo</th><th>Registros</th><th>Tabla en SQLite</th></tr>
             </thead>
             <tbody>
                 {% for dataset in datasets %}
@@ -113,9 +102,8 @@
                     <td>{{ dataset.nombre }}</td>
                     <td>{{ dataset.fuente }}</td>
                     <td>{{ dataset.periodo }}</td>
-                    <td>{{ dataset.filas }}</td>
-                    <td>{{ dataset.columnas }}</td>
-                    <td>{{ dataset.unidad }}</td>
+                    <td>{{ dataset.registros }}</td>
+                    <td><code>{{ dataset.tabla }}</code></td>
                 </tr>
                 {% endfor %}
             </tbody>
