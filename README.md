@@ -14,14 +14,17 @@ muestra internacional (UCI Drug Consumption). Continúa el proyecto del Certamen
 
 | Elemento | Enlace |
 |---|---|
-| Videos (despliegue y presentación del software y del código) | https://drive.google.com/drive/folders/1sbmu1iDnd-lS2RRwEqbwMr3MF8MIDKV3?usp=sharing |
+| Video único: proceso de despliegue + presentación del software y del código | https://drive.google.com/drive/folders/1sbmu1iDnd-lS2RRwEqbwMr3MF8MIDKV3?usp=sharing |
 | Dirección del sitio en AWS | `http://IP_PUBLICA:8000/dashboard/` · en el despliegue se usó `http://184.73.87.213:8000/dashboard/` |
 | Guía de despliegue paso a paso | [docs/Guia_Django_Parte_11_Despliegue_AWS.docx](docs/Guia_Django_Parte_11_Despliegue_AWS.docx) |
 
 El sitio corre en una instancia EC2 de AWS Academy Learner Lab. Ese entorno detiene la instancia al
 cerrar la sesión del laboratorio y le asigna otra dirección IP pública al volver a iniciarla, por lo
 que el sitio está disponible solo mientras el laboratorio está abierto. El funcionamiento desde un
-navegador externo queda registrado en los videos.
+navegador externo queda registrado en el video.
+
+Los dos videos que pide la pauta se entregan en **un solo video**: en la misma grabación se muestra
+el proceso de despliegue en AWS y se presenta el software con la explicación de su código.
 
 ## Requerimientos y dónde están
 
